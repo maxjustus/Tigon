@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/maxjustus/Tigon"
   s.summary     = %q{A simple dsl for hash transformation.}
   s.description = %q{
-      Tigon provides a declarative syntax for transforming hashes. 
+      Tigon adds a transform method to Hash, providing a means to rename and merge keys and manipulate their values.
     }
 
   s.rubyforge_project = "tigon"
