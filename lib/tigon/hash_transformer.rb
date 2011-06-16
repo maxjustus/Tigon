@@ -26,13 +26,13 @@ module Tigon
     def morph(name, newname = false, options = false, &blk)
       options ||= @options
 
-      replace_name = if newname
+      replacement_key = if newname
         newname
       else
         if name.is_a?(String)
           name
         else
-          name.last
+          name.last #assumes an array was passed
         end
       end
 
@@ -44,27 +44,30 @@ module Tigon
         end
 
         if block_given?
-          transformer = self.class.new(current_val, options)
-          v = transformer.instance_exec(&blk)
-
-          #preserve values from previous calls to morph
-          if v.is_a?(Hash) && @new_hash[replace_name]
-            v = v.merge(@new_hash[replace_name])
-          end
-
-          @new_hash[replace_name] = v
+          @new_hash[replacement_key] = nest_tranformation(current_val, replacement_key, options, blk)
         else
-          @new_hash[replace_name] = current_val
+          @new_hash[replacement_key] = current_val
         end
         @new_hash.delete(name) if newname
       end
       @new_hash
     end
 
+    def nest_tranformation(val, replacement_key, options, blk)
+        transformer = self.class.new(val, options)
+        transformed_val = transformer.instance_exec(&blk)
+
+        #preserve values from previous calls to morph
+        if transformed_val.is_a?(Hash) && @new_hash[replacement_key]
+          transformed_val = transformed_val.merge(@new_hash[replacement_key])
+        end
+        transformed_val
+    end
+
     def furthest_value_from_hash(key_array, lookup_hash)
       key_array.reduce(lookup_hash) do |context, k|
         if context.is_a?(Hash)
-          v = context[k]
+          context[k]
         else
           context
         end
